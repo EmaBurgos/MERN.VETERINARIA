@@ -2,6 +2,7 @@ import Veterinario from "../models/veterinario.js";
 import generarJWT from "../helpers/generarJWT.js";
 import generarId from "../helpers/generarid.js";
 import emailRegistro from "../helpers/emailRegistro.js";
+import emailOlvidePassword from "../helpers/emailOlvidePassword.js";
 
 const registrar = async (req, res) => {
   const { email, password, nombre } = req.body;
@@ -31,7 +32,7 @@ const registrar = async (req, res) => {
 const perfil = (req, res) => {
   const { veterinario } = req;
 
-  res.json({ perfil: veterinario });
+  res.json(veterinario);
 };
 
 const confirmar = async (req, res) => {
@@ -70,7 +71,12 @@ const autenticar = async (req, res) => {
   //acaa
 
   if (await usuario.comprobarPassword(password)) {
-    res.json({ token: generarJWT(usuario.id) });
+    res.json({
+      _id: usuario._id,
+      nombre: usuario.nombre,
+      email: usuario.email,
+      token: generarJWT(usuario.id),
+    });
   } else {
     console.log("PASSWORD INCORRECTO");
     const error = new Error("password incorrecto");
@@ -89,6 +95,11 @@ const olvidePassword = async (req, res) => {
   try {
     existeVeterinario.token = generarId();
     await existeVeterinario.save();
+    emailOlvidePassword({
+      email,
+      nombre: existeVeterinario.nombre,
+      token: existeVeterinario.token,
+    });
     res.json({ msg: "Hemos enviado un email" });
   } catch (error) {
     console.log(error);
@@ -119,7 +130,7 @@ const nuevoPassword = async (req, res) => {
     veterinario.token = null;
     veterinario.password = password;
     await veterinario.save();
-    res.json({ msg: "password modificado bien" });
+    res.json({ msg: "tu contraseña fue cambiada" });
   } catch (error) {
     console.log(error);
   }

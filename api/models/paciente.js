@@ -6,6 +6,10 @@ const pacientesSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    propietario: {
+      type: String,
+      required: true,
+    },
     email: {
       type: String,
       required: true,
